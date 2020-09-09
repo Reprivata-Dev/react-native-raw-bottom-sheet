@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Animated,
   PanResponder,
-  Platform
+  Platform,
 } from "react-native";
 import styles from "./style";
 
@@ -16,7 +16,7 @@ const SUPPORTED_ORIENTATIONS = [
   "portrait-upside-down",
   "landscape",
   "landscape-left",
-  "landscape-right"
+  "landscape-right",
 ];
 
 class RBSheet extends Component {
@@ -25,14 +25,21 @@ class RBSheet extends Component {
     this.state = {
       modalVisible: false,
       animatedHeight: new Animated.Value(0),
-      pan: new Animated.ValueXY()
+      pan: new Animated.ValueXY(),
     };
 
     this.createPanResponder(props);
   }
 
   setModalVisible(visible, props) {
-    const { height, minClosingHeight, openDuration, closeDuration, onClose, onOpen } = this.props;
+    const {
+      height,
+      minClosingHeight,
+      openDuration,
+      closeDuration,
+      onClose,
+      onOpen,
+    } = this.props;
     const { animatedHeight, pan } = this.state;
     if (visible) {
       this.setState({ modalVisible: visible });
@@ -40,18 +47,18 @@ class RBSheet extends Component {
       Animated.timing(animatedHeight, {
         useNativeDriver: false,
         toValue: height,
-        duration: openDuration
+        duration: openDuration,
       }).start();
     } else {
       Animated.timing(animatedHeight, {
         useNativeDriver: false,
         toValue: minClosingHeight,
-        duration: closeDuration
+        duration: closeDuration,
       }).start(() => {
         pan.setValue({ x: 0, y: 0 });
         this.setState({
           modalVisible: visible,
-          animatedHeight: new Animated.Value(0)
+          animatedHeight: new Animated.Value(0),
         });
 
         if (typeof onClose === "function") onClose(props);
@@ -66,16 +73,22 @@ class RBSheet extends Component {
       onStartShouldSetPanResponder: () => closeOnDragDown,
       onPanResponderMove: (e, gestureState) => {
         if (gestureState.dy > 0) {
-          Animated.event([null, { dy: pan.y }], { useNativeDriver: false })(e, gestureState);
+          Animated.event([null, { dy: pan.y }], { useNativeDriver: false })(
+            e,
+            gestureState
+          );
         }
       },
       onPanResponderRelease: (e, gestureState) => {
         if (height / 4 - gestureState.dy < 0) {
           this.setModalVisible(false);
         } else {
-          Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
+          Animated.spring(pan, {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: false,
+          }).start();
         }
-      }
+      },
     });
   }
 
@@ -87,6 +100,17 @@ class RBSheet extends Component {
     this.setModalVisible(false, props);
   }
 
+  setHeight(newHeight) {
+    const { animatedHeight } = this.state;
+    const { duration } = this.props;
+
+    Animated.timing(animatedHeight, {
+      toValue: newHeight,
+      duration,
+      useNativeDriver: false
+    }).start();
+  }
+
   render() {
     const {
       animationType,
@@ -96,11 +120,11 @@ class RBSheet extends Component {
       closeOnPressBack,
       children,
       customStyles,
-      keyboardAvoidingViewEnabled
+      keyboardAvoidingViewEnabled,
     } = this.props;
     const { animatedHeight, pan, modalVisible } = this.state;
     const panStyle = {
-      transform: pan.getTranslateTransform()
+      transform: pan.getTranslateTransform(),
     };
 
     return (
@@ -125,14 +149,21 @@ class RBSheet extends Component {
           />
           <Animated.View
             {...(!dragFromTopOnly && this.panResponder.panHandlers)}
-            style={[panStyle, styles.container, { height: animatedHeight }, customStyles.container]}
+            style={[
+              panStyle,
+              styles.container,
+              { height: animatedHeight },
+              customStyles.container,
+            ]}
           >
             {closeOnDragDown && (
               <View
                 {...(dragFromTopOnly && this.panResponder.panHandlers)}
                 style={styles.draggableContainer}
               >
-                <View style={[styles.draggableIcon, customStyles.draggableIcon]} />
+                <View
+                  style={[styles.draggableIcon, customStyles.draggableIcon]}
+                />
               </View>
             )}
             {children}
@@ -157,7 +188,7 @@ RBSheet.propTypes = {
   customStyles: PropTypes.objectOf(PropTypes.object),
   onClose: PropTypes.func,
   onOpen: PropTypes.func,
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 RBSheet.defaultProps = {
@@ -174,7 +205,7 @@ RBSheet.defaultProps = {
   customStyles: {},
   onClose: null,
   onOpen: null,
-  children: <View />
+  children: <View />,
 };
 
 export default RBSheet;
